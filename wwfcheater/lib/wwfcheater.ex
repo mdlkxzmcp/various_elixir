@@ -1,11 +1,16 @@
 defmodule Wwfcheater do
-  def pick _, '' do
-    ''
-  end
-  def pick tiles, [ letter | _] do
-    cond do
-      Enum.member?(tiles, letter) -> [ letter ]
-      true -> ''
+    def pick(tiles, word) do
+      pick(tiles, word, '')
     end
-  end
+    def pick(tiles, word, accumulator) when tiles == '' or word == '' do
+      accumulator
+    end
+    def pick tiles, [ letter | rest ], accumulator do
+        cond do
+            Enum.member?(tiles, letter) ->
+                pick( tiles -- [ letter ], rest, accumulator ++ [ letter ] )
+            true ->
+                pick( tiles, rest, accumulator)
+        end
+    end
 end

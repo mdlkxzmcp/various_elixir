@@ -17,4 +17,7 @@ defmodule WwfcheaterTest do
   test "We can pick a tile for a one letter word" do
     assert Wwfcheater.pick('abc', 'a') == 'a'
   end
+  test "We can pick out all the tiles for a word" do
+    assert Wwfcheater.pick('abcdef', 'bdf') == 'bdf'
+  end
 end
