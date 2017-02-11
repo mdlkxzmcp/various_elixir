@@ -10,15 +10,19 @@ defmodule Cart do
     cart == []
   end
 
-  def add(_, product) do
-    [product]
+  def add(cart, product) do
+    cart ++ [product]
   end
 
   def remove(cart, product) do
-    []
+    cart -- [product]
   end
 
   def contains?(cart, product) do
-    cart == [product]
+    cart |> Enum.member?(product)
+  end
+
+  def count(cart) do
+    cart |> Enum.count()
   end
 end
