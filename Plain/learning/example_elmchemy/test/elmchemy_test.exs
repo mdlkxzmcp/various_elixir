@@ -3,8 +3,4 @@ defmodule ElmchemyTest do
   use Elmchemy
   doctest Hello
 
-  test "Hello" do
-    assert Hello.hello() == "world!"
-  end
-
 end
