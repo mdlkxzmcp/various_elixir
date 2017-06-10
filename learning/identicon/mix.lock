@@ -1,0 +1,2 @@
+%{"egd": {:git, "https://github.com/erlang/egd.git", "ee2b51351f43223fd7f7c47d042ba6edee6c33d6", [tag: "0.9.1"]},
+  "percept": {:git, "https://github.com/erlang/percept.git", "44ee3ca98bcd37dfab691072e953131107ebec55", []}}
