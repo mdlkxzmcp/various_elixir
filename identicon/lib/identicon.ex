@@ -4,41 +4,6 @@ defmodule Identicon do
     The file is in the format of "`input`.png"
   """
 
-  @doc false
-  def main(argv) do
-    argv
-    |> parse_args
-    |> process
-    System.halt(0)
-  end
-
-  @doc false
-  def parse_args(argv) do
-    parse = OptionParser.parse(argv, switches: [help: :boolean])
-    case parse do
-      {_, ["help"], _} -> {:help}
-      {_, [input], _} -> {input}
-      _ -> {:help}
-    end
-  end
-
-  @doc false
-  def process({:help}) do
-    IO.puts """
-
-    Create a unique image that is always the same for the same `input`.
-    Requires Erlang.
-
-    usage: ./identicon <input>
-    """
-  end
-
-  @doc false
-  def process({input}) do
-    create_identicon(input)
-  end
-
-
   @doc """
   Creates an Identicon in the project directory
 

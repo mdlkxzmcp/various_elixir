@@ -24,6 +24,6 @@ defmodule Identicon.Mixfile do
   end
 
   defp escript do
-    [main_module: Identicon]
+    [main_module: Identicon.CLI]
   end
 end
