@@ -3,7 +3,7 @@ defmodule Identicon.Mixfile do
 
   def project do
     [app: :identicon,
-     escript: escript(),
+     escript: escript_config(),
      version: "0.1.0",
      source_url: "https://github.com/Mdlkxzmcp/various_elixir/identicon",
      elixir: "~> 1.4",
@@ -23,7 +23,7 @@ defmodule Identicon.Mixfile do
     ]
   end
 
-  defp escript do
+  defp escript_config do
     [main_module: Identicon.CLI]
   end
 end
