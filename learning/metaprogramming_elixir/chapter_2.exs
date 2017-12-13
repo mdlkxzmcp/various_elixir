@@ -52,9 +52,13 @@ defmodule Assertion do
     quote do
       import unquote(__MODULE__)
       Module.register_attribute __MODULE__, :tests, accumulate: true
-      def run do
-        IO.puts "Running the tests (#{inspect @tests})"
-      end
+      @before_compile unquote(__MODULE__)
+    end
+  end
+
+  defmacro __before_compile__(_env) do
+    quote do
+      def run, do: Assertion.Test.run(@tests, __MODULE__)
     end
   end
 
@@ -73,38 +77,59 @@ defmodule Assertion do
     end
   end
 
-
 end
 
 defmodule Assertion.Test do
+
+  def run(tests, module) do
+    Enum.each tests, fn {test_func, description} ->
+      case apply(module, test_func, []) do
+        :ok -> IO.write "."
+        {:fail, reason} -> IO.puts """
+
+          ===============================================
+          FAILURE: #{description}
+          ===============================================
+          #{reason}
+        """
+      end
+    end
+  end
+
   def assert(:==, lhs, rhs) when lhs == rhs do
-    IO.write "."
+    :ok
   end
   def assert(:==, lhs, rhs) do
-    IO.puts """
-    FAILURE:
+    {:fail, """
       Expected:       #{lhs}
       to be equal to: #{rhs}
-    """
+      """
+    }
   end
 
   def assert(:>, lhs, rhs) when lhs > rhs do
-    IO.write "."
+    :ok
   end
   def assert(:>, lhs, rhs) do
-    IO.puts """
-    FAILURE:
+    {:fail, """
       Expected:           #{lhs}
       to be greater than: #{rhs}
-    """
+      """
+    }
   end
 end
 
 defmodule MathTest do
   use Assertion
 
-  assert 5 == 5
-  assert 10 > 0
-  assert 1 > 2
-  assert 10 * 10 == 100
+  test "integers can be added and subtracted" do
+    assert 2 + 3 == 5
+    assert 5 - 5 == 10
+  end
+
+  test "integers can be multiplied and divided" do
+    assert 5 * 5 == 25
+    assert 10 / 2 == 5
+  end
+
 end
