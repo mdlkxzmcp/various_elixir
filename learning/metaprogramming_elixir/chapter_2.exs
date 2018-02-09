@@ -5,8 +5,8 @@
 ### Re-Creating the if Macro
 
 defmodule ControlFlow do
-
   defmacro my_if(expr, do: if_block), do: if(expr, do: if_block, else: nil)
+
   defmacro my_if(expr, do: if_block, else: else_block) do
     quote do
       case unquote(expr) do
@@ -17,11 +17,9 @@ defmodule ControlFlow do
   end
 end
 
-
 ### Adding a while Loop to Elixir
 
 defmodule Loop do
-
   defmacro while(expression, do: block) do
     quote do
       try do
@@ -29,7 +27,7 @@ defmodule Loop do
           if unquote(expression) do
             unquote(block)
           else
-            Loop.break
+            Loop.break()
           end
         end
       catch
@@ -38,20 +36,18 @@ defmodule Loop do
     end
   end
 
-  def break, do: throw :break
+  def break, do: throw(:break)
 end
-
 
 ## Smarter Testing with Macros
 
 ### Supercharged Assertions and Using Module Attributes for Code Generation
 
 defmodule Assertion do
-
   defmacro __using__(_options) do
     quote do
       import unquote(__MODULE__)
-      Module.register_attribute __MODULE__, :tests, accumulate: true
+      Module.register_attribute(__MODULE__, :tests, accumulate: true)
       @before_compile unquote(__MODULE__)
     end
   end
@@ -64,6 +60,7 @@ defmodule Assertion do
 
   defmacro test(description, do: test_block) do
     test_func = String.to_atom(description)
+
     quote do
       @tests {unquote(test_func), unquote(description)}
       def unquote(test_func)(), do: unquote(test_block)
@@ -76,46 +73,49 @@ defmodule Assertion do
       Assertion.Test.assert(operator, lhs, rhs)
     end
   end
-
 end
 
 defmodule Assertion.Test do
-
   def run(tests, module) do
-    Enum.each tests, fn {test_func, description} ->
+    Enum.each(tests, fn {test_func, description} ->
       case apply(module, test_func, []) do
-        :ok -> IO.write "."
-        {:fail, reason} -> IO.puts """
+        :ok ->
+          IO.write(".")
 
-          ===============================================
-          FAILURE: #{description}
-          ===============================================
-          #{reason}
-        """
+        {:fail, reason} ->
+          IO.puts("""
+
+            ===============================================
+            FAILURE: #{description}
+            ===============================================
+            #{reason}
+          """)
       end
-    end
+    end)
   end
 
   def assert(:==, lhs, rhs) when lhs == rhs do
     :ok
   end
+
   def assert(:==, lhs, rhs) do
-    {:fail, """
-      Expected:       #{lhs}
-      to be equal to: #{rhs}
-      """
-    }
+    {:fail,
+     """
+     Expected:       #{lhs}
+     to be equal to: #{rhs}
+     """}
   end
 
   def assert(:>, lhs, rhs) when lhs > rhs do
     :ok
   end
+
   def assert(:>, lhs, rhs) do
-    {:fail, """
-      Expected:           #{lhs}
-      to be greater than: #{rhs}
-      """
-    }
+    {:fail,
+     """
+     Expected:           #{lhs}
+     to be greater than: #{rhs}
+     """}
   end
 end
 
@@ -131,5 +131,4 @@ defmodule MathTest do
     assert 5 * 5 == 25
     assert 10 / 2 == 5
   end
-
 end

@@ -1,8 +1,8 @@
 # The Language of Macros
 
-IO.inspect quote do: 5 + 2
+IO.inspect(quote do: 5 + 2)
 # {:+, [context: Elixir, import: Kernel], [5, 2]}
-IO.inspect quote do: 1 * 2 + 3
+IO.inspect(quote do: 1 * 2 + 3)
 # {:+, [context: Elixir, import: Kernel],
 #  [{:*, [context: Elixir, import: Kernel], [1, 2]}, 3]}
 
@@ -13,7 +13,7 @@ defmodule Math do
       lhs = unquote(lhs)
       rhs = unquote(rhs)
       result = lhs + rhs
-      IO.puts "#{lhs} plus #{rhs} is #{result}"
+      IO.puts("#{lhs} plus #{rhs} is #{result}")
       result
     end
   end
@@ -24,12 +24,11 @@ defmodule Math do
       lhs = unquote(lhs)
       rhs = unquote(rhs)
       result = lhs * rhs
-      IO.puts "#{lhs} times #{rhs} is #{result}"
+      IO.puts("#{lhs} times #{rhs} is #{result}")
       result
     end
   end
 end
-
 
 ## Re-Creating Elixir’s unless Macro
 
@@ -41,21 +40,20 @@ defmodule ControlFlow do
   end
 end
 
-
 ## Injecting Code
 
 defmodule Mod do
   defmacro definfo do
-    IO.puts "In macro's context (#{__MODULE__})."
+    IO.puts("In macro's context (#{__MODULE__}).")
 
     quote do
-      IO.puts "In caller's context (#{__MODULE__})."
+      IO.puts("In caller's context (#{__MODULE__}).")
 
       def friendly_info do
-        IO.puts """
+        IO.puts("""
         My name is #{__MODULE__}
-        My functions are #{inspect __info__(:functions)}
-        """
+        My functions are #{inspect(__info__(:functions))}
+        """)
       end
     end
   end
@@ -63,7 +61,7 @@ end
 
 defmodule MyModule do
   require Mod
-  Mod.definfo
+  Mod.definfo()
 end
 
 defmodule Setter do
