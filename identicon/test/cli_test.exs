@@ -1,6 +1,6 @@
 defmodule CliTest do
   use ExUnit.Case
-  doctest Identicon
+  doctest Identicon.CLI
 
   import Identicon.CLI, only: [parse_args: 1]
 
