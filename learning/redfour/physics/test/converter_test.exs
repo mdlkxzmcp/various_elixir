@@ -11,6 +11,4 @@ defmodule ConverterTest do
     ls = Converter.to_light_seconds({:miles, 1000}, precision: 5)
     assert ls == 0.00537
   end
-
-
 end

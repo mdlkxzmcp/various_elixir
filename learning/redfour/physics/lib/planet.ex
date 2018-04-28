@@ -1,30 +1,27 @@
 defmodule Planet do
-
   import Calcs
   import Converter
   import Physics.Laws
 
-  defstruct [
-    mass: 0,
-    radius: 0,
-    type: :unknown,
-    name: nil,
-    ev: 0
-  ]
+  defstruct mass: 0,
+            radius: 0,
+            type: :unknown,
+            name: nil,
+            ev: 0
 
-  def select, do: for planet <- planets(), do: planet |> set_escape_velocity
-  def escape_velocity, do: escape_velocity(Planet.select[:earth])
+  def select, do: for(planet <- planets(), do: planet |> set_escape_velocity)
+  def escape_velocity, do: escape_velocity(Planet.select()[:earth])
 
   def escape_velocity(planet) do
-    2 * newtons_gravitational_constant() * planet.mass / planet.radius
-      |> square_root
-      |> to_km
-      |> to_nearest_tenth
+    (2 * newtons_gravitational_constant() * planet.mass / planet.radius)
+    |> square_root
+    |> to_km
+    |> to_nearest_tenth
   end
 
   defp planets do
     [
-      {:mercury,%Planet{name: "Mercury", type: :rocky, mass: 3.3e23, radius: 2.439e6}},
+      {:mercury, %Planet{name: "Mercury", type: :rocky, mass: 3.3e23, radius: 2.439e6}},
       {:venus, %Planet{name: "Venus", type: :rocky, mass: 4.86e24, radius: 6.05e6}},
       {:earth, %Planet{name: "Earth", type: :rocky, mass: 5.972e24, radius: 6.37e6}},
       {:mars, %Planet{name: "Mars", type: :rocky, mass: 6.41e23, radius: 3.37e6}},
@@ -42,5 +39,4 @@ defmodule Planet do
   # def count_planets(planets), do: count_planets(planets, 0)
   # def count_planets([_head | tail], count), do: count_planets(tail, count + 1)
   # def count_planets([], count), do: count
-
 end

@@ -7,7 +7,7 @@ defmodule ElhexDelivery.PostalCode.Cache do
 
   def init(_) do
     state = %{
-      distance: %{},
+      distance: %{}
     }
 
     {:ok, state}

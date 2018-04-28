@@ -13,22 +13,17 @@ defmodule Physics.RocketryTest do
   end
 
   test "Orbital term for 100km above the default - Earth" do
-    term = orbital_term(100) # |> IO.inspect
+    term = orbital_term(100)
     assert term == 1.4
   end
 
   test "Orbital acceleration for Jupiter at 100km" do
-    orbital_acc = orbital_acceleration(Planet.select[:jupiter], 100)
+    orbital_acc = orbital_acceleration(Planet.select()[:jupiter], 100)
     assert orbital_acc == 24.659005330334
   end
 
   test "Orbital term for Saturn at 6000km" do
-    term = orbital_term(Planet.select[:saturn], 6000)
+    term = orbital_term(Planet.select()[:saturn], 6000)
     assert term == 4.8
   end
-
-  # test "Orbital radius for 4h term above the default - Earth" do
-  #   height = orbital_radius_for_term(4)
-  #   assert height |> orbital_term == 4
-  # end
 end

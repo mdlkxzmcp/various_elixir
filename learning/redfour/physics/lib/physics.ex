@@ -11,5 +11,4 @@ defmodule Physics do
     opts = [strategy: :one_for_one, name: Physics.Supervisor]
     Supervisor.start_link(children, opts)
   end
-
 end

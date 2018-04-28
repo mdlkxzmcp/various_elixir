@@ -3,7 +3,8 @@ defmodule Mix.Tasks.Physics.LoadFlares do
   use Timex
 
   def run(_args) do
-    Mix.Task.run "app.start"
+    Mix.Task.run("app.start")
+
     flares = [
       %{classification: "X", stations: 10, scale: 99.0, date: Timex.to_date({1859, 8, 29})},
       %{classification: "M", stations: 10, scale: 5.8, date: Timex.to_date({2015, 1, 12})},
@@ -12,10 +13,9 @@ defmodule Mix.Tasks.Physics.LoadFlares do
       %{classification: "M", stations: 7, scale: 83.6, date: Timex.to_date({2015, 6, 23})},
       %{classification: "C", stations: 10, scale: 2.5, date: Timex.to_date({2015, 7, 4})},
       %{classification: "X", stations: 2, scale: 72.0, date: Timex.to_date({2012, 7, 23})},
-      %{classification: "X", stations: 4, scale: 45.0, date: Timex.to_date({2003, 11, 4})},
+      %{classification: "X", stations: 4, scale: 45.0, date: Timex.to_date({2003, 11, 4})}
     ]
 
-    for flare <- flares, do: struct(Physics.SolarFlare, flare) |> Physics.Repo.insert!
+    for flare <- flares, do: struct(Physics.SolarFlare, flare) |> Physics.Repo.insert!()
   end
-
 end

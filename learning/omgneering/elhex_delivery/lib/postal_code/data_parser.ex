@@ -5,11 +5,11 @@ defmodule ElhexDelivery.PostalCode.DataParser do
     [_header | data_rows] = File.read!(@postal_codes_filepath) |> String.split("\n")
 
     data_rows
-      |> Stream.map(&String.split(&1, "\t"))
-      |> Stream.filter(&data_row?(&1))
-      |> Stream.map(&parse_data_columns(&1))
-      |> Stream.map(&format_row(&1))
-      |> Enum.into(%{})
+    |> Stream.map(&String.split(&1, "\t"))
+    |> Stream.filter(&data_row?(&1))
+    |> Stream.map(&parse_data_columns(&1))
+    |> Stream.map(&format_row(&1))
+    |> Enum.into(%{})
   end
 
   defp data_row?(row) do
@@ -25,7 +25,7 @@ defmodule ElhexDelivery.PostalCode.DataParser do
   end
 
   defp parse_number(str) do
-    str |> String.replace(" ", "") |> String.to_float
+    str |> String.replace(" ", "") |> String.to_float()
   end
 
   defp format_row([postal_code, latitude, longitude]) do

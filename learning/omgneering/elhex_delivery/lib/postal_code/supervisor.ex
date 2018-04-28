@@ -13,6 +13,6 @@ defmodule ElhexDelivery.PostalCode.Supervisor do
       worker(Cache, [])
     ]
 
-  supervise(children, strategy: :one_for_one)
+    supervise(children, strategy: :one_for_one)
   end
 end

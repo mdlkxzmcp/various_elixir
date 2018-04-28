@@ -7,7 +7,7 @@ defmodule ElhexDelivery.PostalCode.Navigator do
   @radius 3959
 
   def start_link do
-    GenServer.start_link(__MODULE__,[], name: :postal_code_navigator)
+    GenServer.start_link(__MODULE__, [], name: :postal_code_navigator)
   end
 
   def get_distance(from, to) do
@@ -33,9 +33,10 @@ defmodule ElhexDelivery.PostalCode.Navigator do
         distance = calculate_distance({lat1, long1}, {lat2, long2})
         Cache.set_distance(from, to, distance)
         distance
-      distance -> distance
-    end
 
+      distance ->
+        distance
+    end
   end
 
   defp get_geolocation(postal_code) do
@@ -43,10 +44,12 @@ defmodule ElhexDelivery.PostalCode.Navigator do
   end
 
   defp format_postal_code(postal_code) when is_binary(postal_code), do: postal_code
+
   defp format_postal_code(postal_code) when is_integer(postal_code) do
     postal_code = Integer.to_string(postal_code)
     format_postal_code(postal_code)
   end
+
   defp format_postal_code(postal_code) do
     error = "unexpected `postal_code`, received: (#{inspect(postal_code)})"
     raise ArgumentError, error
@@ -65,13 +68,13 @@ defmodule ElhexDelivery.PostalCode.Navigator do
     sin_lat_diff_sq = Math.sin(lat_diff / 2) |> Math.pow(2)
     sin_long_diff_sq = Math.sin(long_diff / 2) |> Math.pow(2)
 
-    a = sin_lat_diff_sq + (cos_lat1 * cos_lat2 * sin_long_diff_sq)
+    a = sin_lat_diff_sq + cos_lat1 * cos_lat2 * sin_long_diff_sq
     c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 
-    @radius * c |> Float.round(2)
+    (@radius * c) |> Float.round(2)
   end
 
   defp degrees_to_radians(degrees) do
-    degrees * (Math.pi / 180)
+    degrees * (Math.pi() / 180)
   end
 end

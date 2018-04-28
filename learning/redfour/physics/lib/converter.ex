@@ -1,7 +1,6 @@
 defmodule Converter do
-
-  def seconds_to_hours(val)  when is_integer(val) or is_float(val) do
-    val / 3600 |> to_nearest_tenth
+  def seconds_to_hours(val) when is_integer(val) or is_float(val) do
+    (val / 3600) |> to_nearest_tenth
   end
 
   def to_nearest_tenth(val) do
@@ -17,13 +16,16 @@ defmodule Converter do
   end
 
   def to_light_seconds(arg), do: to_light_seconds(arg, precision: 5)
+
   def to_light_seconds({unit, val}, precision: precision) do
-    light_seconds = case unit do
-      :miles -> from_miles(val)
-      :meters -> from_meters(val)
-      :feet -> from_feet(val)
-      :inches -> from_inches(val)
-    end
+    light_seconds =
+      case unit do
+        :miles -> from_miles(val)
+        :meters -> from_meters(val)
+        :feet -> from_feet(val)
+        :inches -> from_inches(val)
+      end
+
     light_seconds |> round_to(precision)
   end
 
@@ -32,5 +34,4 @@ defmodule Converter do
   defp from_feet(val), do: val * 1.016702651488166404e-9
   defp from_inches(val), do: val * 8.472522095734715723e-11
   defp round_to(val, precision), do: Float.round(val, precision)
-
 end
