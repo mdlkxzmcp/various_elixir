@@ -8,6 +8,7 @@ defmodule StreamsTest do
   describe "repeat/0/1" do
     test "is a construct" do
       assert Stream.construct?(repeat()) == true
+      assert Stream.construct?(repeat(1)) == true
     end
 
     property "returns the same thing always" do
@@ -32,7 +33,7 @@ defmodule StreamsTest do
     end
   end
 
-  describe "integers_from/0/1" do
+  describe "integers_from/1" do
     test "is a construct" do
       assert Stream.construct?(integers_from(5)) == true
     end
@@ -72,7 +73,7 @@ defmodule StreamsTest do
     end
 
     property "returns consecutive elements of a list" do
-      types = [float(), boolean(), atom(:alphanumeric), binary(), string(:ascii)]
+      types = [float(), boolean(), binary(), string(:ascii)]
 
       check all l <- list_of(one_of(types), length: 10) do
         expected = l

@@ -117,7 +117,7 @@ defmodule Streams do
   end
 
   @doc """
-  Returns a construct that streams lines from the given file until :eof.
+  Returns a construct that streams lines from the given file `path` until :eof.
   """
   @spec stream_lines(String.t()) :: Element.t() | []
   def stream_lines(path) do
