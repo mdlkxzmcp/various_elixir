@@ -35,7 +35,7 @@ defmodule GallowsWeb.Endpoint do
   plug Plug.Session,
     store: :cookie,
     key: "_gallows_key",
-    signing_salt: "911gRaO1"
+    signing_salt: "TGb4sIor"
 
   plug GallowsWeb.Router
 

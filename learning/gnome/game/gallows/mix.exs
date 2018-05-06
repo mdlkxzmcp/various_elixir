@@ -42,7 +42,8 @@ defmodule Gallows.Mixfile do
       {:cowboy, "~> 1.0"},
       {:excoveralls, "~> 0.7", only: :test},
       {:stream_data, "~> 0.4.2"},
-      {:hound, "~> 1.0"}
+      {:hound, "~> 1.0"},
+      {:hangman, [path: "../hangman"]}
     ]
   end
 end
