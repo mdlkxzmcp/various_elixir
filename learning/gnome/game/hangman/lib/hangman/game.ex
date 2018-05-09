@@ -4,19 +4,34 @@ defmodule Hangman.Game do
             letters: [],
             used: MapSet.new()
 
+  @typedoc """
+  Type that represents `Hangman.Game` struct.
+  """
+  @type t() :: %Hangman.Game{
+          turns_left: integer,
+          game_state: atom,
+          letters: list(String.t()),
+          used: MapSet.t()
+        }
+
+  @spec new_game() :: Hangman.Game.t()
   def new_game, do: new_game(Dictionary.random_word())
 
+  @spec new_game(String.t()) :: Hangman.Game.t()
   def new_game(word) do
     %Hangman.Game{
       letters: word |> String.codepoints()
     }
   end
 
+  @spec make_move(Hangman.Game.t(), String.t()) ::
+          {Hangman.Game.t(), (Hangman.Game.t() -> Hangman.Game.t())}
   def make_move(game, guess) do
     game = do_move(game, guess)
     {game, tally(game)}
   end
 
+  @spec tally(Hangman.Game.t()) :: Hangman.Game.t()
   def tally(game) do
     %{
       game_state: game.game_state,

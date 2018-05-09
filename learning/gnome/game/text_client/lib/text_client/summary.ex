@@ -1,4 +1,5 @@
 defmodule TextClient.Summary do
+  @spec display(Hangman.Game.t()) :: Hangman.Game.t()
   def display(game = %{tally: tally}) do
     IO.puts([
       "\n",

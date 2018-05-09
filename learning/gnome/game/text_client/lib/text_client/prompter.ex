@@ -1,6 +1,7 @@
 defmodule TextClient.Prompter do
   alias TextClient.State
 
+  @spec accept_move(State.t()) :: :ok
   def accept_move(game = %State{}) do
     IO.gets("Your guess: ")
     |> check_input(game)

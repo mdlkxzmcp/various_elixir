@@ -1,1 +1,113 @@
-/* This file is for your main application css. */
+body {
+    font-family: 'Gloria Hallelujah', cursive !important;
+}
+ 
+.hide_component {
+    opacity: 0.1;
+}
+ 
+svg path {
+    transition: opacity 0.5s;
+}
+ 
+.alert {
+    font-size:  150%;
+    text-align: center;
+}
+ 
+.so-far {
+    display: inline-block;
+    padding-left: 1.5rem;
+    color: #388;
+    font-size: 150%;
+    letter-spacing: 0.4em;
+}
+ 
+.turns-left {
+    margin-top: -2rem;
+    color: #888;
+    text-align: center;
+}
+ 
+.guess-buttons {
+    margin-top: 1rem;
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+ 
+.guess-buttons button {
+    display: inline-block;
+    width: 3.5rem;
+    height: 3.5rem;
+    margin: 0.7rem;
+    padding: 0.7rem;
+    border: 3px solid #e8e8f0;
+    border-radius: 50%;
+    background: #f8f8f8;
+    color:  #33a;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+ 
+.guess-buttons button:hover {
+    background: #d0d0ee;
+    transition: background-color 0.3s;
+}
+ 
+.guess-buttons button:disabled {
+    background: #fedede;
+    color:      #933;
+    transition: all 0.3s;
+}
+ 
+.guess-buttons button:disabled.correct {
+    background: #defede;
+    color:      #393;
+    transition: all 0.3s;
+}
+ 
+ 
+ 
+ 
+.new-game-button-container {
+  width: 120px;
+  height: 60%;
+ 
+}
+ 
+.new-game-button {
+  -webkit-animation: pulse 1.5s infinite;
+  display: block;
+  width: 120px;
+  height: 60px;
+  margin-top: 5rem;
+  border: none;
+  border-radius: 60px;
+  background: rgb(190,169,212);
+  box-shadow: 0px 0px 0px 0px rgba(190, 169, 212, .5);
+  color: white;
+  font-size: 1.3em;
+  font-weight: bold;
+  letter-spacing: -1px;
+  line-height: 60px;
+  text-align: center;
+  cursor: pointer;
+}
+.new-game-button:hover {
+  -webkit-animation: none;
+}
+ 
+@-webkit-keyframes pulse {
+  0% {
+    transform: scale(.9);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 50px rgba(90, 169, 212, 0);
+  }
+  100% {
+      transform: scale(.9);
+      box-shadow: 0 0 0 0 rgba(90, 169, 212, 0);
+  }
+}
