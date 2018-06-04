@@ -8,6 +8,8 @@ A small project that for the most part gives me a place to include some new tech
 ---
 ### learning
 Folder containing various code I've (re)written and that I understand (but mostly did not come up with). Some of which containes information about the source and such.
+#### [Adopting Elixir](https://pragprog.com/book/tvmelixir/adopting-elixir):
+Notes and code implementations from the wonderful "Adpoting Elixir" book. It covers a ton of really important topics that are hard to get to without some good source like e.g. deployment, integration with external code, and many other. Covers many Erlang tools as well! 10/10 :>
 #### Budget:
 Tbh I don't know, might've been a part of a Elixir meetup I attended in early 2017
 #### Cards:
