@@ -31,7 +31,7 @@ lockfile: "../../mix.lock",
 ```
 The coupling means that any dependency shared by the apps have to use the same version with the exact same configurations. It sits between a Monolith and Services (being way closer to SOA).
 
-[*An example of an Umbrella project.*]((https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_4/my_umbrella)
+[*An example of an Umbrella project.*](https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_4/my_umbrella)
 
 ---
 
