@@ -1,4 +1,7 @@
-# Notes
+# [Adopting Elixir](https://pragprog.com/book/tvmelixir/adopting-elixir)
+Notes.
+
+---
 
 ## Chapter 3 – Ensuring Code Consistency
 See [`belief_structure`](https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_3/belief_structure) dir for `mix.exs` example of the following tools:
@@ -153,3 +156,72 @@ NIFs:
 * [Rustler](https://github.com/hansihe/rustler) -> Safe Rust bridge for creating NIFs.
 
 ---
+
+## Chapter 8 – Coordinating Deployments
+For very simple deployments, Mix is a straightforward option. All one needs to do is run `MIX_ENV=prod mix run --no-halt` which comiles ands starts the application tree. `--no-halt` guarantees Elixir won't terminate after booting the application. The `prod` setting ensures that all the relevant configuration is being used such as `:start_permanent` – a shut down causes the whole VM to close.
+
+When deploying to multiple servers, one way of going about it is by having a build machine that produces the deployment artefact which then gets used by the production servers. This requires using the same compiled files, which can be enforced with `--no-compile`.
+
+Another thing possible is cleaning the dependencies to remove e.g. VC metadata. This can be acomplished by running `rm -rf deps/*/.git` on build and then by passing `--no-deps-check` in production.
+
+The VM can be configured as well. Kernel pooling can be enabled with `+K true` which provides an OS-specific I/O event notification system. The async thread pool (responsible for all the I/O work done by the code) can be increased with `+A 10`, where 10 is the default but can be changed to whatever suits the needs. Since the `mix run` can't receive VM configurations, a solution is to invoke `mix` through `elixir` – `elixir --erl "+K true" -S mix run`, where `--erl` is a way to pass VM commands and `-S` flag is used to instruct `elixir` to run `mix`.
+
+
+### Managing Shared I/O with [run_erl](http://erlang.org/doc/man/run_erl.html)
+`run_erl`, which is a UNIX specific tool, redirects all output to log files. It expects a named pipe, log directory, and the command to execute. The log dir must be created before invoking `run_erl`. In production, `run_erl` is usualy executed with the `-daemon` flag.
+
+The whole process looks something like this:
+
+`$ mkdir ./log; run_erl -daemon ./loop ./log "elixir -e 'Enum.map(Stream.interval(1000, &IO.puts/1))'"`
+
+The `run_erl` tool rotates logs every 100KB keeping the last 4 `log/erlang.log.#` files.
+
+The named pipe allows for interfacing with any running program via `to_erl`. With it, directly invoking commands is as easy as `$ echo "command" | to_erl ./app`, but connecting is also possible with `to_erl ./app`.
+
+[An example implementation of both `run_erl` and `to_erl`](https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_8/logs) [(see `note.md` for more info)](https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_8/logs/note.md).
+
+
+### Monitoring Heartbeat with [heart](http://erlang.org/doc/man/heart.html)
+Since one of the goals of `MIX_ENV=prod` is proper shutdown of the whole VM in case of an application crash, there is a need for a tool that will restart it when that happens. This is where `heart` comes into play. It can be started by passing `-heart` flag to the VM, and will detect termination of the BEAM. In the case of such detection, `heart` will execute a given `HEART_COMMAND` environment variable:
+
+```
+$ export HEART_COMMAND="elixir --erl '-heart' -e \
+  'Enum.map(Stream.interval(1000), &IO.puts/1)'"
+$ eval $HEART_COMMAND
+```
+This potentially can work **incorrectly** if the new instance started by `heart` doesn't have access to the standard I/O, as the original instance was directly connected to the shell. Writing standard I/O to disk instead of the terminal solves this issue.
+
+
+### A summary of the methods from above:
+* On the build machine:
+```
+$ MIX_ENV=prod mix compile
+$ rm -rf deps/*/.git
+```
+
+* In production:
+```
+$ mkdir ./log
+$ export HEART_COMMAND="run_erl -daemon ./app ./log \
+    \"MIX_ENV=prod iex --erl '-heart +K true +A 64' -S  \
+    mix run --no-halt --no-compile --no-deps-check\""
+$ eval $HEART_COMMAND
+```
+
+
+### Releases
+The previous way is obviously error prone, difficult to manage, and overall not practical. It also loads code in an interactive way, meaning that modules are loaded only once they are called. The way to go is releases, which contain all of the dependencies, including the whole Erlang runtime and Elixir without the need for neither source code nor installation of either one of the two languages. Releases run in *embedded* mode, meaning that all modules are preloaded. They also allow for greater control over each application that is a part of the release [(with setting them up in a distributed way included if needed)](http://erlang.org/doc/design_principles/distributed_applications.html), as well as doing multiple specific configurations for different system targets. The release artifact is stored in a `.tar.gz` file.
+
+If NIFs are part of the dependency, the releases should be built in an environment that matches the production target.
+
+[An example of a release build made with](https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_8/sample) [`Distillery`](https://github.com/bitwalker/distillery). The [`README.md`](https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_8/sample/README.md) file has additional information on the implementation.
+
+
+### Distributed Erlang
+It is highly recommended to use custom cookies when connecting nodes. Encryption [can be achieved](https://www.erlang-solutions.com/blog/erlang-distribution-over-tls.html) with [TLS](https://erlang.org/doc/apps/ssl/ssl_protocol.html).
+
+The nodes send a configurable heartbeat (a special message sent in a specified time interval) over the connection to verify to others that they are still up. Sending too much data at once might delay the heartbeat message, which in turn could lead to the nodes disconnecting.
+
+One of the tools that come with Erlang is the [EPMD (Erlang Port Mapper Daemon)](https://erlang.org/doc/man/epmd.html) which is responsible for helping distributed nodes to connect to one another. It runs on port 4369, and will return all names and ports for local instances. This means that there are at least two ports opened by Erlang for each machine. The way to get around that is to use a fixed port with `$ elixir --erl "-kernel inet_dist_listen_min PORT -kernel inet_dist_listen_max PORT"` which gets rid of the need for EPMD. This can be achieved by making a replacing client module for EPMD and adding it to the command – `$ iex --erl "-start_epmd false -epmd_module Elixir.ReplacingModule .."` as demonstrated [here](https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_8/name_and_port.ex).
+
+As a side note, there are existing packages for setting up clusters like [Libcluster](https://github.com/bitwalker/libcluster) or [Peerage](https://github.com/mrluc/peerage) which provide orthogonal solutions.

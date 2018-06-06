@@ -1,0 +1,28 @@
+## Name of the node
+-name sample@127.0.0.1
+
+## Cookie for distributed erlang
+-setcookie WD4@SpJmc$xqVO<0LrR6&9M^558>$Gzm;SiaX0hVBV/L55Wm_6s9RM$ICjAjM9=n
+
+## Heartbeat management; auto-restarts VM if it dies or becomes unresponsive
+-heart
+
+## Enable kernel poll and a few async threads
++K true
++A 64
+
+## Increase number of concurrent ports/sockets
+-env ERL_MAX_PORTS 4096
+
+## Increase limit of processes to one million
++P 1000000
+
+## Limit the range of assigned ports
+-kernel inet_dist_listen_min 9100
+-kernel inet_dist_listen_max 9200
+
+## Tweak GC to run more often
+##-env ERL_FULLSWEEP_AFTER 10
+
+# Enable SMP automatically based on availability
+-smp auto
