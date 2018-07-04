@@ -16,6 +16,8 @@ Tbh I don't know, might've been a part of a Elixir meetup I attended in early 20
 Same here...
 #### Cart:
 This one is 100% from the said meetup.
+#### [Craft GraphQL](https://pragprog.com/book/wwgraphql/craft-graphql-apis-in-elixir-with-absinthe) [WIP]:
+TODO: add description
 #### [ElixirSips](https://www.dailydrip.com/topics/elixir):
 Barely even started... Will probably update this once I do some more stuff :>
 #### Example_Elmchemy:
@@ -33,7 +35,7 @@ Notes and such from the 1.3 book. It is a bit outdated now, and I can't wait for
 #### [RedFour](https://bigmachine.io/products/take-off-with-elixir):
 A fantastic book/video-set on using Elixir. Unlike most other sources, this one implements one big project instead of many smaller ones.
 #### Wwfcheater:
-Same as the first 3. 2017 meetup that got me hooked on Elixir.
+Same as the first Budget, Cards and Cart. From 2017 meetup that got me hooked on Elixir.
 
 ---
 

@@ -5,18 +5,18 @@ Notes.
 
 ## Chapter 3 – Ensuring Code Consistency
 See [`belief_structure`](https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_3/belief_structure) dir for `mix.exs` example of the following tools:
-* `mix credo --strict` / `mix credo _path/_file.ex:_line` -> [linter](https://github.com/rrrene/credo)
-* `mix dialyzer` -> [type check](https://github.com/jeremyjh/dialyxir)
-* `mix docs` -> [generate documentation](https://github.com/elixir-lang/ex_doc)
-* `mix inch` -> [documentation coverage](https://github.com/rrrene/inch_ex)
-* `mix coveralls` / `mix coveralls.detail` / `mix coveralls.html` -> [test coverage](https://github.com/parroty/excoveralls)
+  * `mix credo --strict` / `mix credo _path/_file.ex:_line` -> [linter](https://github.com/rrrene/credo)
+  * `mix dialyzer` -> [type check](https://github.com/jeremyjh/dialyxir)
+  * `mix docs` -> [generate documentation](https://github.com/elixir-lang/ex_doc)
+  * `mix inch` -> [documentation coverage](https://github.com/rrrene/inch_ex)
+  * `mix coveralls` / `mix coveralls.detail` / `mix coveralls.html` -> [test coverage](https://github.com/parroty/excoveralls)
 
 Those can be added to any project for a greater code consistency, requiring only slight changes in the `mix.exs` file.
 
 Other interesting libraries:
-* [Bypass](https://github.com/PSPDFKit-labs/bypass) -> running a web API on the same VM as the tests.
-* [Mox](https://github.com/plataformatec/mox) -> if *really* needed, an option for mocking.
-* [Bureaucrat](https://github.com/api-hogs/bureaucrat) -> Phoenix API documentation! (requires a bit of configuration but well worth it~)
+  * [Bypass](https://github.com/PSPDFKit-labs/bypass) -> running a web API on the same VM as the tests.
+  * [Mox](https://github.com/plataformatec/mox) -> if *really* needed, an option for mocking.
+  * [Bureaucrat](https://github.com/api-hogs/bureaucrat) -> Phoenix API documentation! (requires a bit of configuration but well worth it~)
 
 ---
 
@@ -81,12 +81,12 @@ The Erlang Term Storage provides a high-level mechanism for storing data in-memo
 
 ### Message Delivery Guarantees
 There are three main event types which include message delivery:
-* #### at-most-once
-When nothing bad happens if a message doesn't arrive. Requires no additional work.
-* #### at-least-once
-There is a need for a persistence mechanism as loosing a message is problematic. [RabbitMQ](https://www.rabbitmq.com) ([on Github](https://github.com/rabbitmq/rabbitmq-server)) is a standard third-party solution.
-* #### exacly-once
-In some cases, a message has to be recieved, but only once. In such situations, passing a unique ID that identifies given message is a way to guarantee that it is idempotent.
+  * #### at-most-once
+  When nothing bad happens if a message doesn't arrive. Requires no additional work.
+  * #### at-least-once
+  There is a need for a persistence mechanism as loosing a message is problematic. [RabbitMQ](https://www.rabbitmq.com) ([on Github](https://github.com/rabbitmq/rabbitmq-server)) is a standard third-party solution.
+  * #### exacly-once
+  In some cases, a message has to be recieved, but only once. In such situations, passing a unique ID that identifies given message is a way to guarantee that it is idempotent.
 
 ---
 
@@ -96,9 +96,9 @@ There are three main strategies for such integration, each with a different leve
 
 ### [NIFs](http://erlang.org/doc/man/erl_nif.html)
 Native implemented functions allow loading code into the same memory address space as the Erlang VM. ([An implementation with a Makefile](https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_7/elixir_nif)). They are usafe due to the fact, that:
-  - a crash in a NIF crashes the whole node, not just one process;
-  - they can lead to internal VM inconsistencies, so unexpected behavior and crashes are to be expected;
-  - NIFs may also interfere with scheduling, as their work doesn't stop until finished. It may also cause extreme memory usage. Fun stuff :=]
+  * a crash in a NIF crashes the whole node, not just one process;
+  * they can lead to internal VM inconsistencies, so unexpected behavior and crashes are to be expected;
+  * NIFs may also interfere with scheduling, as their work doesn't stop until finished. It may also cause extreme memory usage. Fun stuff :=]
 
 #### Preemption and Dirty Schedulers
 By default, for each core, the BEAM VM starts a thread that runs a scheduler. The scheduler is responsible for the *soft* real-time guarantees of the system. Each process is given by the scheduler a discrete number of reductions. When it runs its allocation, the VM preempts it to allow the next one to run (aka. *preemptive multitasking*). There are specific points of execution where a process **can** actually be suspended such as at a receive or a function call.
@@ -107,10 +107,10 @@ Some processes might have higher priority causing the BEAM to interrupt anothers
 
 There is also a feature called *dirty schedulers* – There are two categories of dirty schedulers – I/O bound and CPU bound. The VM starts 10 threads as I/O-bounds and one CPU-bound for each core. The shell displays informations on them – "`[ds:8:8:10]`", showing 8 CPU schedulers, 8 active, and 10 I/O ones respectively.
 #### [Long-running NIF Solutions](https://youtu.be/FYQcn9zcZVA?t=8m58s)
-* Dirty NIF – a NIF that cannot be split and cannot execute in a milisecond or less. A "dirty NIF" does not mean "faster NIF" though, as it just doesn't block the normal schedulers.
-* Yielding NIF ([timeslice](http://erlang.org/doc/man/erl_nif.html#enif_consume_timeslice)) – Involves splitting the NIF into a series of chunks. The oficially preffered method. May still cause problems at longer periods.
-* *Yielding Dirty NIF* – A combination of yielding and dirty, where a yielding NIF is run on one of the dirty schedulers. Very good performence at longer periods.
-* Threaded NIF – done by dispatching the work to another thread.
+  * Dirty NIF – a NIF that cannot be split and cannot execute in a milisecond or less. A "dirty NIF" does not mean "faster NIF" though, as it just doesn't block the normal schedulers.
+  * Yielding NIF ([timeslice](http://erlang.org/doc/man/erl_nif.html#enif_consume_timeslice)) – Involves splitting the NIF into a series of chunks. The oficially preffered method. May still cause problems at longer periods.
+  * *Yielding Dirty NIF* – A combination of yielding and dirty, where a yielding NIF is run on one of the dirty schedulers. Very good performence at longer periods.
+  * Threaded NIF – done by dispatching the work to another thread.
 
 [A great resource for more info on NIFs.](https://github.com/potatosalad/elixirconf2017)
 
@@ -127,13 +127,13 @@ If it terminates, the calling code gets a tuple "`{result, status_code}`". Simil
 [An example of both – using Port API, and `send/2` to achieve similar results](https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_7/port_1) (see [note.md](https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_7/port_1/note_md) for more info).
 
 [There are various options that can be passed to `Port.open/2.`](http://erlang.org/doc/man/erlang.html#open_port-2) Some examples:
-* `:exit_status` -> sends a status message on termination;
-* `:cd` -> starts the port with the given current working directory;
-* `:args` -> passes a list of arguments to the port;
-* `:env` -> executes the port program with additional environment variables;
-* `:use_stdio` -> allows the standard i/o (file descriptors 0 and 1);
-* `:nouse_stdio` -> uses file descriptors 3 and 4 for communication instead of the standard io. For when the software writes messages that shouldn't be displayed on the stdio;
-* [`packet: N`](https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_7/port_2) -> instructs the port to automatically include a number of bytes: 1, 2, or 4, at the beginning of every message with the message length. This way it becomes aparent how long each message is, and the `Port` module takes care of only delivering the response when it is complete.
+  * `:exit_status` -> sends a status message on termination;
+  * `:cd` -> starts the port with the given current working directory;
+  * `:args` -> passes a list of arguments to the port;
+  * `:env` -> executes the port program with additional environment variables;
+  * `:use_stdio` -> allows the standard i/o (file descriptors 0 and 1);
+  * `:nouse_stdio` -> uses file descriptors 3 and 4 for communication instead of the standard io. For when the software writes messages that shouldn't be displayed on the stdio;
+  * [`packet: N`](https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_7/port_2) -> instructs the port to automatically include a number of bytes: 1, 2, or 4, at the beginning of every message with the message length. This way it becomes aparent how long each message is, and the `Port` module takes care of only delivering the response when it is complete.
 
 #### Termination and Zombie Processes
 In the case of VM crash or abrupt port termination, a long-running program started by the port will have its io channels closed but **it won't be automatically terminated**. [There are solutions for those *zombie processes*, such as bash script wraps.](https://hexdocs.pm/elixir/Port.html#module-zombie-processes)
@@ -149,11 +149,11 @@ Such implementation requires serialization and deserialization of Erlang data st
 
 ### Alternatives
 Built on top of Ports:
-* [Porcelain](https://github.com/alco/porcelain) -> sane API for using ports to communicate with external OS processes from Elixir.
-* [Erlexec](https://github.com/saleyn/erlexec) -> Execute and control OS processes from Erlang/OTP
-* [ErlPort](https://github.com/jdoig/erlport) -> integration with Ruby and Python (fork, main repo appears to be dead :<)
-NIFs:
-* [Rustler](https://github.com/hansihe/rustler) -> Safe Rust bridge for creating NIFs.
+  * [Porcelain](https://github.com/alco/porcelain) -> sane API for using ports to communicate with external OS processes from Elixir.
+  * [Erlexec](https://github.com/saleyn/erlexec) -> Execute and control OS processes from Erlang/OTP
+  * [ErlPort](https://github.com/jdoig/erlport) -> integration with Ruby and Python (fork, main repo appears to be dead :<)
+  NIFs:
+  * [Rustler](https://github.com/hansihe/rustler) -> Safe Rust bridge for creating NIFs.
 
 ---
 
@@ -193,20 +193,20 @@ This potentially can work **incorrectly** if the new instance started by `heart`
 
 
 ### A summary of the methods from above:
-* On the build machine:
-```
-$ MIX_ENV=prod mix compile
-$ rm -rf deps/*/.git
-```
+  * On the build machine:
+  ```
+  $ MIX_ENV=prod mix compile
+  $ rm -rf deps/*/.git
+  ```
 
-* In production:
-```
-$ mkdir ./log
-$ export HEART_COMMAND="run_erl -daemon ./app ./log \
-    \"MIX_ENV=prod iex --erl '-heart +K true +A 64' -S  \
-    mix run --no-halt --no-compile --no-deps-check\""
-$ eval $HEART_COMMAND
-```
+  * In production:
+  ```
+  $ mkdir ./log
+  $ export HEART_COMMAND="run_erl -daemon ./app ./log \
+      \"MIX_ENV=prod iex --erl '-heart +K true +A 64' -S  \
+      mix run --no-halt --no-compile --no-deps-check\""
+  $ eval $HEART_COMMAND
+  ```
 
 
 ### Releases
