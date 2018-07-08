@@ -225,3 +225,73 @@ The nodes send a configurable heartbeat (a special message sent in a specified t
 One of the tools that come with Erlang is the [EPMD (Erlang Port Mapper Daemon)](http://erlang.org/doc/man/epmd.html) which is responsible for helping distributed nodes to connect to one another. It runs on port 4369, and will return all names and ports for local instances. This means that there are at least two ports opened by Erlang for each machine. The way to get around that is to use a fixed port with `$ elixir --erl "-kernel inet_dist_listen_min PORT -kernel inet_dist_listen_max PORT"` which gets rid of the need for EPMD. This can be achieved by making a replacing client module for EPMD and adding it to the command – `$ iex --erl "-start_epmd false -epmd_module Elixir.ReplacingModule .."` as demonstrated [here](https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_8/name_and_port.ex).
 
 As a side note, there are existing packages for setting up clusters like [Libcluster](https://github.com/bitwalker/libcluster) or [Peerage](https://github.com/mrluc/peerage) which provide orthogonal solutions.
+
+---
+
+## Chapter 9 – Metrics and Performance Expectations
+
+### Observer
+#### System tab
+Most of the information shown in the `System and Architecture` as well as `CPU's and Threads` is from a call to [`:erlang.system_info/1`](http://erlang.org/doc/man/erlang.html#system_info-1), which actually returns way more than what is being used by the Observer.
+
+`Memory Usage` is displayed thanks to an Erlang function [`:erlang.memory/0`](http://erlang.org/doc/man/erlang.html#memory-0). This is an important function for metrics, as it returns a total amount of memory dynamically allocated for: atoms, binaries (outside of process heap), code loaded by the VM, ets tables, as well as processes.
+
+`Statistics` shows as one of the fields, two other important ones – `Max Processes` and `Processes`. When the maximum is reached, the VM will refuse to spawn new processes, which makes this an important place for stress testing.
+
+
+#### Processes tab
+This tab shows all the processes and their: amount of reductions (`Reds`) executed, memory usage (`Memory`), as well as the message queue length (`MsgQ`).
+
+All processes can be found with `Process.list/0`, locally registered with `Processes.registered/0`. Those return PIDs which can be further analized with `Process.info/1`.
+
+
+### Run Queue
+A queue of actions for each scheduler on each core. An overloaded system will show a surge of actions (symptoms include timeouts and increase in error rates) and can be usually solved by either scaling vertically or horizontally. The appropriate value for the `run queue` depends on many things, but it is still useful to collect its state. The information can be retrieved by calling [`:erlang.statistics/1`](http://erlang.org/doc/man/erlang.html#statistics-1) with a `:total_run_queue_lengths` argument.
+
+
+### Measuring Ecto and Phoenix
+See [`README.md`](https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_9/demo/README.md) file in the [`demo`](https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_9/demo) dir for more on the subjects of:
+
+  - **Instrumentation** -> the measurement and control of processes within an application. Transfers in a mostly smooth fashion to other libraries if they provide their own hooks.
+
+  - **Load testing** -> depends on the type of the application as there are different tools used for each.
+
+  - **Profiling** -> the technique of measuring frequency and the duration of function calls.
+
+
+### Benchmarking
+The act of comparing the performance of different implementations. [An example of a benchmark](https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_9/benchmark). Since proper benchmarking has a lot of implementation requirements, it is a good choice to just use one of the libraries like [Benchee](https://github.com/PragTob/benchee). ❤️
+
+
+### Metric Systems
+This is by no means an exhaustive list, but it includes some of the more popular solutions:
+  * [Elixometer](https://github.com/pinterest/elixometer) -> a wrapper around [Exometer](https://github.com/Feuerlabs/exometer). Allows for metric definition and automatic subscription to the default reporter of the environment.
+  * [`scout_apm`](https://github.com/scoutapp/scout_apm_elixir) -> provides an in-browser profiler for development and monitors the performence in production.
+  * [AppSignal](https://github.com/appsignal/appsignal-elixir) -> collects exceptions and performence data, which then gets analized. Alerts when an error occurs or an endpoint is responding slowly. ([AppSignal site for Elixir](https://appsignal.com/elixir))
+  * [PryIn](https://pryin.io) -> application performance monitoring made for Elixir and Phoenix.
+  * [Prometheus.ex](https://github.com/deadtrickster/prometheus.ex) -> [Prometheus.io](https://prometheus.io) Elixir client. Expects an HTTP endpoint `/metrics` from which all the data is periodically collected. Can be then integrated with [for example](https://aldusleaf.org/2016-09-30-monitoring-elixir-apps-in-2016-prometheus-and-grafana.html) [Grafana](https://grafana.com) for graphing.
+  * [Fluxter](https://github.com/lexmag/fluxter) -> a UDP pool provider for [InfluxDB](https://www.influxdata.com/time-series-platform/influxdb) and/or [Telegraf](https://www.influxdata.com/time-series-platform/telegraf). More on this [here](https://tech.forzafootball.com/blog/gathering-metrics-in-elixir-applications).
+
+
+### Performance Assessment Workflow
+Since there is way too much to actually measure, focus is important. Load testing a feature and comparing it to requirements is the right first step to identifying hotspots in the system. Benchmarks can be then used to compare different solutions.
+
+It is extremally important to measure not only the average, but also at least one of the 90th, 95th, and 99th percentiles.
+
+Another important thing is avoiding performance regressions. Each time a hotspot is found, it should be carefully watched, especially when new features are added.
+
+
+### Neat-o
+
+The ratio for atoms, ports and processes can be computed as:
+```Elixir
+100 * :erlang.system_info(:type_count) /
+:erlang.system_info(:type_limit)
+```
+
+Top five processes by memory usage:
+```Elixir
+Process.list()
+|> Enum.sort_by(&Process.info(&1, :memory))
+|> Enum.take(-5)
+```
