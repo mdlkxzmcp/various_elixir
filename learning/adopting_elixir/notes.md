@@ -90,7 +90,7 @@ There are three main event types which include message delivery:
 
 ---
 
-## Chapter 7 – [Integrating with External Code](https://erlang.org/doc/tutorial/overview.html)
+## Chapter 7 – [Integrating with External Code](http://erlang.org/doc/tutorial/overview.html)
 There are three main strategies for such integration, each with a different level of coupling:
 
 
@@ -144,7 +144,7 @@ If concurrent usage of ports is expected, pooling is a way to limit the amount o
 
 ### The Erlang Distribution Protocol
 As long as a language or a platform implements the Erlang distribution protocol, it is possible to use that language to communicate with Erlang nodes.
-Such implementation requires serialization and deserialization of Erlang data structures into binaries, plus the capability to communicate with [Erlang's Port Mapper Daemon (EPMD)](https://erlang.org/doc/man/epmd.html). OTP ships with implementations for [C (ErlInterface)](https://erlang.org/doc/apps/erl_interface/ei_users_guide.html) and [Java (JInterface)](https://erlang.org/doc/apps/jinterface/jinterface_users_guide.html).
+Such implementation requires serialization and deserialization of Erlang data structures into binaries, plus the capability to communicate with [Erlang's Port Mapper Daemon (EPMD)](http://erlang.org/doc/man/epmd.html). OTP ships with implementations for [C (ErlInterface)](http://erlang.org/doc/apps/erl_interface/ei_users_guide.html) and [Java (JInterface)](http://erlang.org/doc/apps/jinterface/jinterface_users_guide.html).
 
 
 ### Alternatives
@@ -218,10 +218,10 @@ If NIFs are part of the dependency, the releases should be built in an environme
 
 
 ### Distributed Erlang
-It is highly recommended to use custom cookies when connecting nodes. Encryption [can be achieved](https://www.erlang-solutions.com/blog/erlang-distribution-over-tls.html) with [TLS](https://erlang.org/doc/apps/ssl/ssl_protocol.html).
+It is highly recommended to use custom cookies when connecting nodes. Encryption [can be achieved](https://www.erlang-solutions.com/blog/erlang-distribution-over-tls.html) with [TLS](http://erlang.org/doc/apps/ssl/ssl_protocol.html).
 
 The nodes send a configurable heartbeat (a special message sent in a specified time interval) over the connection to verify to others that they are still up. Sending too much data at once might delay the heartbeat message, which in turn could lead to the nodes disconnecting.
 
-One of the tools that come with Erlang is the [EPMD (Erlang Port Mapper Daemon)](https://erlang.org/doc/man/epmd.html) which is responsible for helping distributed nodes to connect to one another. It runs on port 4369, and will return all names and ports for local instances. This means that there are at least two ports opened by Erlang for each machine. The way to get around that is to use a fixed port with `$ elixir --erl "-kernel inet_dist_listen_min PORT -kernel inet_dist_listen_max PORT"` which gets rid of the need for EPMD. This can be achieved by making a replacing client module for EPMD and adding it to the command – `$ iex --erl "-start_epmd false -epmd_module Elixir.ReplacingModule .."` as demonstrated [here](https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_8/name_and_port.ex).
+One of the tools that come with Erlang is the [EPMD (Erlang Port Mapper Daemon)](http://erlang.org/doc/man/epmd.html) which is responsible for helping distributed nodes to connect to one another. It runs on port 4369, and will return all names and ports for local instances. This means that there are at least two ports opened by Erlang for each machine. The way to get around that is to use a fixed port with `$ elixir --erl "-kernel inet_dist_listen_min PORT -kernel inet_dist_listen_max PORT"` which gets rid of the need for EPMD. This can be achieved by making a replacing client module for EPMD and adding it to the command – `$ iex --erl "-start_epmd false -epmd_module Elixir.ReplacingModule .."` as demonstrated [here](https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_8/name_and_port.ex).
 
 As a side note, there are existing packages for setting up clusters like [Libcluster](https://github.com/bitwalker/libcluster) or [Peerage](https://github.com/mrluc/peerage) which provide orthogonal solutions.
