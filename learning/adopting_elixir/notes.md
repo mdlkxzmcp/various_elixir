@@ -242,7 +242,7 @@ Most of the information shown in the `System and Architecture` as well as `CPU's
 #### Processes tab
 This tab shows all the processes and their: amount of reductions (`Reds`) executed, memory usage (`Memory`), as well as the message queue length (`MsgQ`).
 
-All processes can be found with `Process.list/0`, locally registered with `Processes.registered/0`. Those return PIDs which can be further analized with `Process.info/1`.
+All processes can be found with [`Process.list/0`](https://hexdocs.pm/elixir/Process.html#list/0), locally registered with [`Process.registered/0`](https://hexdocs.pm/elixir/Process.html#registered/0). Those return PIDs which can be further analized with [`Process.info/1`](https://hexdocs.pm/elixir/Process.html#info/1).
 
 
 ### Run Queue
@@ -266,7 +266,7 @@ The act of comparing the performance of different implementations. [An example o
 ### Metric Systems
 This is by no means an exhaustive list, but it includes some of the more popular solutions:
   * [Elixometer](https://github.com/pinterest/elixometer) -> a wrapper around [Exometer](https://github.com/Feuerlabs/exometer). Allows for metric definition and automatic subscription to the default reporter of the environment.
-  * [`scout_apm`](https://github.com/scoutapp/scout_apm_elixir) -> provides an in-browser profiler for development and monitors the performence in production.
+  * [scout_apm](https://github.com/scoutapp/scout_apm_elixir) -> provides an in-browser profiler for development and monitors the performence in production.
   * [AppSignal](https://github.com/appsignal/appsignal-elixir) -> collects exceptions and performence data, which then gets analized. Alerts when an error occurs or an endpoint is responding slowly. ([AppSignal site for Elixir](https://appsignal.com/elixir))
   * [PryIn](https://pryin.io) -> application performance monitoring made for Elixir and Phoenix.
   * [Prometheus.ex](https://github.com/deadtrickster/prometheus.ex) -> [Prometheus.io](https://prometheus.io) Elixir client. Expects an HTTP endpoint `/metrics` from which all the data is periodically collected. Can be then integrated with [for example](https://aldusleaf.org/2016-09-30-monitoring-elixir-apps-in-2016-prometheus-and-grafana.html) [Grafana](https://grafana.com) for graphing.
@@ -295,3 +295,109 @@ Process.list()
 |> Enum.sort_by(&Process.info(&1, :memory))
 |> Enum.take(-5)
 ```
+
+---
+
+## Chapter 10 – Making The App Production Ready
+### Logs and Errors
+Logging in Elixir is provided by [`Logger`](https://hexdocs.pm/logger/Logger.html). It has four severity levels: `:debug`, `:info`, `:warn`, and `:error`. Invoking it is as simple as:
+```Elixir
+require Logger
+Logger.debug("hello")
+```
+It is also internally used for handling errors from all the processes that terminate unexpectedly in the system. The data is in the form of unstructured messages, which means that this is mostly to be used for development. This is further imposed by the fact that it logs to the default standard output, which can easily become a bottleneck (_standard output is a single entity that forces serial access!_).
+
+It is, however, possible to limit logging in production. If a metrics system is in place, `config :logger, level: :warn` will decrease the cost of `Logger`. The best thing to do is wrapping all log messages in anonymous functions. This makes sure that the insides of the function will be called only if it is of proper level. An example of this:
+```Elixir
+def log(entry) do
+  Logger.info(fn ->
+    "Received this thing here #{entry}"
+  end, [additional: :metadata])
+  entry
+end
+```
+It is also possible to remove all `Logger` calls below the configured in `config.exs` severity at compilation time with `compile_time_purge_level: :warn`.
+
+`Logger` is almost a complete tool on its own, but there are situations when an external system will expect all messages to be of a specific format. If that's the case, one can implement a simple formatter that will do the desired transformations. [An example of such a formatter](https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_10/formatter).
+
+There are also situations when the entire backend for the logger must be custom. Logging system takes the role of providing warnings and errors when metrics are in place, meaning that it pushes data to exception and error tracking systems. There are some solutions already made:
+  * [rollbax](https://github.com/elixir-addicts/rollbax) for [Rollbar](https://rollbar.com)
+  * [sentry-elixir](https://github.com/getsentry/sentry-elixir) for [Sentry](https://sentry.io)
+  * [honeybadger-elixir](https://github.com/honeybadger-io/honeybadger-elixir) for [Honeybadger](https://www.honeybadger.io)
+
+
+### SASL Reports
+System Architecture Support Libraries, ship as part of Erlang/OTP, providing detailed crash and progress reports from supervisors. It can be enabled in CLI with: `$ iex --loger-sasl-reports true`. This will cause additional logging of every started application as well as which supervisor starts which child.
+
+Each time a supervisor notices a terminated child, a crash report, which consists of multiple separate reports, is made.
+
+To have SASL start at application boot, two things are necessary:
+  1. In `mix.exs` -> `extra_applications: [:sasl, :logger]`. The order is important.
+  2. In `config.exs` -> `config :logger, handle_sasl_reports: true`
+
+
+### Tracing
+For developing, there are two debugging tools:
+  * [Erlangs debugger GUI](http://erlang.org/doc/apps/debugger/debugger_chapter.html)
+  * [`IEx.break!/4`](https://hexdocs.pm/iex/IEx.html#break!/4)
+
+They stop the execution of one or more processes and inspect their environment. This is all nice and dandy, but what about production? This is where tracing comes in place.
+
+
+Tracing is provided with the function [`:erlang.trace/3`](http://erlang.org/doc/man/erlang.html#trace-3), which sends a message to a choosen process whenever some event happens.
+```Elixir
+iex> {:ok, agent} = Agent.start_link(fn -> %{} end)
+{:ok, pid}
+iex> :erlang.trace(agent, true, [:receive])
+1
+iex> Agent.get(agent, &(&1))
+%{}
+iex> flush()
+{:trace, pid, :receive, ...}
+```
+
+It can also be done with [`:dbg`](http://erlang.org/doc/man/dbg.html), which is a part of the [`:runtime_tools`](http://erlang.org/doc/man/runtime_tools_app.html) application. `:dbg` removes the need for manual setup of traces, and instead allows for invocation of a specific function from a given module:
+```Elixir
+iex> {:ok, agent} = Agent.start_link(fn -> %{} end)
+{:ok, pid_1}
+iex> :dbg.c(Agent, :get, [agent, &(&1)])
+(pid_2) pid_1 ! {'$gen_call', ...}
+```
+
+`:dbg.c` is great for understanding the message queue flow between processes. When that is not enough, long-running traces can be set:
+```Elixir
+iex> :dbg.tracer
+{:ok, pid_1}
+iex> :dbg.p(:all, [:call])
+{:ok, [{:matched, :nodename@host, 46}]}
+iex> :dbg.tp(URI, [])
+{:ok, [{:matched, :nodename@host, 22}]}
+iex> URI.decode_query("foo=bar")
+(pid_2) call 'Elixir.URI':'__info__'(macros)
+(pid_2) call 'Elixir.URI':decode_query(<<"foo=bar">>)
+```
+`:dbg.p` was called and set to trace all processes that handle the `:call` event. Whenever a call event is set, a trace pattern is also required (`:dbg.tp`).
+
+Improper call of a `:dbg` function with the `:all` option can potentially cause serious problems, so its usage is ill-advised. It is, however, possible to work around this issue by having [such a module](https://github.com/Mdlkxzmcp/various_elixir/tree/master/learning/adopting_elixir/chapter_10/dbg.exs) as part of the application, and using it when tracing is needed.
+
+
+There are other great tracing tools:
+  * [Recon](https://ferd.github.io/recon) -> Erlang based; made by Fred Hebert.
+  * [Tracer](https://github.com/gabiz/tracer) -> Elixir tracing framework which has quite a few tools included.
+  * [`:sys`](http://erlang.org/doc/man/sys.html) -> allows for tracing of the default Elixir behaviors, such as GenServer and Supervisor, as well as collecting statistics. [More on this tool](https://hexdocs.pm/elixir/GenServer.html#module-debugging-with-the-sys-module).
+
+
+### Other Advanced Tools
+#### Debugging with [`:runtime_tools`](http://erlang.org/doc/man/runtime_tools_app.html)
+It has many really useful tools included, such as:
+  * An Observer backend for remote debugging.
+  * Integration with OS-level tracers such as [Linux Trace Toolkit](http://erlang.org/doc/apps/runtime_tools/LTTng.html), [DTRACE](http://erlang.org/doc/apps/runtime_tools/DTRACE.html), and [SystemTap](http://erlang.org/doc/apps/runtime_tools/SYSTEMTAP.html).
+  * [Microstate accounting](http://erlang.org/doc/man/msacc.html), a tool, which measures the time spent by the runtime in several low-level tasks in a short time interval.
+
+#### Exploring `:crash_dump`
+Whenever a system terminates abruptly, the BEAM will write a crash report. It is so extensive, that a tool is required to study its contents. Such a tool is [`:crashdump_viewer.start/0`](http://erlang.org/doc/man/crashdump_viewer.html), a part of the `:observer` application.
+
+#### Community based alternatives.
+  * [wObserver](https://github.com/shinyscorpion/wobserver) -> Web based metrics, monitoring, and observer. Observes production nodes through a web interface.
+  * [visualixir](https://github.com/koudelka/visualixir) -> development-time process message visualizer.
+  * [erlyberly](https://github.com/andytill/erlyberly) -> GUI for tracing during development.
